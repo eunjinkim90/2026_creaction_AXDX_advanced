@@ -7,7 +7,7 @@
     content="width=device-width, initial-scale=1.0"
   />
 
-  <title>야키소바 주문</title>
+  <title>상품 주문</title>
 
   <script src="https://js.tosspayments.com/v2/standard"></script>
 
@@ -58,6 +58,12 @@
       line-height: 1.6;
     }
 
+    .product-list {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
     .card {
       overflow: hidden;
       background: #ffffff;
@@ -66,15 +72,19 @@
       box-shadow: 0 8px 26px rgba(0, 0, 0, 0.06);
     }
 
-    .food-image {
+    .product-media {
       display: grid;
       place-items: center;
       height: 220px;
-      background:
-        radial-gradient(circle at 25% 20%, #ffd58d, transparent 28%),
-        linear-gradient(135deg, #ff9f43, #ff7043);
-      font-size: 92px;
-      user-select: none;
+      background: #10151c;
+      overflow: hidden;
+    }
+
+    .product-media img,
+    .product-media video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .content {
@@ -135,8 +145,75 @@
       box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.12);
     }
 
-    .total-row {
+    .subtotal-row {
       margin-top: 2px;
+    }
+
+    .subtotal-label {
+      font-size: 15px;
+      color: #4e5968;
+      font-weight: 700;
+    }
+
+    .subtotal-price {
+      font-size: 18px;
+      font-weight: 800;
+      color: #e8590c;
+    }
+
+    .summary-section {
+      margin-top: 22px;
+      padding: 22px 24px;
+      background: #ffffff;
+      border: 1px solid #e5e8eb;
+      border-radius: 16px;
+    }
+
+    .summary-section h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .summary-empty {
+      margin: 0;
+      color: #8b95a1;
+      font-size: 14px;
+    }
+
+    .summary-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .summary-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 9px 0;
+      border-top: 1px solid #edf0f2;
+      font-size: 14px;
+    }
+
+    .summary-list li:first-child {
+      border-top: none;
+    }
+
+    .summary-list .item-name {
+      color: #333d4b;
+    }
+
+    .summary-list .item-amount {
+      color: #191f28;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .total-row {
+      margin-top: 4px;
+      padding-top: 16px;
+      border-top: 1px solid #edf0f2;
     }
 
     .total-label {
@@ -148,48 +225,6 @@
       font-size: 25px;
       font-weight: 900;
       color: #e8590c;
-    }
-
-    .customer-section {
-      margin-top: 18px;
-      padding: 20px;
-      background: #ffffff;
-      border: 1px solid #e5e8eb;
-      border-radius: 16px;
-    }
-
-    .customer-section h2 {
-      margin: 0 0 17px;
-      font-size: 18px;
-    }
-
-    .field {
-      margin-bottom: 15px;
-    }
-
-    .field:last-child {
-      margin-bottom: 0;
-    }
-
-    .field label {
-      display: block;
-      margin-bottom: 7px;
-      color: #4e5968;
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    .field input {
-      width: 100%;
-      padding: 13px 14px;
-      border: 1px solid #d1d6db;
-      border-radius: 10px;
-      outline: none;
-    }
-
-    .field input:focus {
-      border-color: #3182f6;
-      box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.12);
     }
 
     .pay-button {
@@ -208,7 +243,7 @@
         opacity 0.15s ease;
     }
 
-    .pay-button:hover {
+    .pay-button:hover:not(:disabled) {
       transform: translateY(-1px);
     }
 
@@ -329,7 +364,7 @@
         font-size: 27px;
       }
 
-      .food-image {
+      .product-media {
         height: 190px;
       }
 
@@ -343,9 +378,10 @@
 <body>
   <main class="page">
     <header class="header">
-      <h1>야키소바 주문</h1>
+      <h1>상품 주문</h1>
       <p>
-        수량을 선택한 후 토스페이먼츠 결제창에서 결제를 진행하세요.
+        원하는 상품의 수량을 선택한 후 토스페이먼츠 결제창에서 결제를 진행하세요.<br />
+        여러 상품을 한 번에 담아 함께 결제할 수 있습니다.
       </p>
     </header>
 
@@ -371,76 +407,27 @@
     </section>
 
     <div id="orderArea">
-      <section class="card">
-        <div class="food-image" aria-label="야키소바">
-          🍜
-        </div>
+      <div id="productList" class="product-list">
+        <!-- 상품 카드는 JS에서 자동 생성됩니다. -->
+      </div>
 
-        <div class="content">
-          <span class="badge">인기 메뉴</span>
+      <section class="summary-section">
+        <h2>주문 요약</h2>
 
-          <h2 class="product-title">야키소바</h2>
+        <p id="summaryEmpty" class="summary-empty">
+          아직 선택한 상품이 없습니다.
+        </p>
 
-          <p class="description">
-            쫄깃한 면과 채소를 고소한 소스에 볶아 만든 일본식 볶음면입니다.
-          </p>
+        <ul id="summaryList" class="summary-list" style="display: none;"></ul>
 
-          <div class="row">
-            <div>
-              <div class="row-label">가격</div>
-              <div class="unit-price">1개 기준</div>
-            </div>
-
-            <strong>1,000원</strong>
-          </div>
-
-          <div class="row">
-            <label for="quantity" class="row-label">수량</label>
-
-            <select id="quantity">
-              <option value="1">1개</option>
-              <option value="2">2개</option>
-              <option value="3">3개</option>
-              <option value="4">4개</option>
-              <option value="5">5개</option>
-            </select>
-          </div>
-
-          <div class="row total-row">
-            <span class="total-label">총 결제금액</span>
-            <strong id="totalPrice" class="total-price">1,000원</strong>
-          </div>
+        <div class="row total-row">
+          <span class="total-label">총 결제금액</span>
+          <strong id="totalPrice" class="total-price">0원</strong>
         </div>
       </section>
 
-      <section class="customer-section">
-        <h2>주문자 정보</h2>
-
-        <div class="field">
-          <label for="customerName">이름</label>
-          <input
-            id="customerName"
-            type="text"
-            maxlength="30"
-            placeholder="홍길동"
-            autocomplete="name"
-          />
-        </div>
-
-        <div class="field">
-          <label for="customerEmail">이메일</label>
-          <input
-            id="customerEmail"
-            type="email"
-            maxlength="100"
-            placeholder="example@email.com"
-            autocomplete="email"
-          />
-        </div>
-      </section>
-
-      <button id="payButton" class="pay-button" type="button">
-        1,000원 결제하기
+      <button id="payButton" class="pay-button" type="button" disabled>
+        상품을 선택해주세요
       </button>
 
       <p class="notice">
@@ -458,16 +445,34 @@
      */
     const CLIENT_KEY = "test_ck_nRQoOaPz8L4J7YLwqx4P8y47BMw6";
 
-    const PRODUCT = {
-      name: "야키소바",
-      unitPrice: 1000
-    };
+    const MAX_QUANTITY = 10;
 
-    const quantitySelect = document.getElementById("quantity");
+    const PRODUCTS = [
+      {
+        id: "hall",
+        name: "35평 홀 6인 기준 2시간",
+        unitPrice: 5000,
+        description: "35평 규모의 홀 공간을 6인 기준, 2시간 동안 이용하실 수 있습니다.",
+        mediaType: "image",
+        mediaSrc:
+          "https://github.com/eunjinkim90/2026_creaction_AXDX_advanced/blob/main/%EC%83%88%20%ED%8F%B4%EB%8D%94/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202026-07-26%20105013.png?raw=true"
+      },
+      {
+        id: "video",
+        name: "테스트 동영상",
+        unitPrice: 50000,
+        description: "테스트용 동영상 상품입니다.",
+        mediaType: "video",
+        mediaSrc:
+          "https://github.com/eunjinkim90/2026_creaction_AXDX_advanced/raw/refs/heads/main/%EC%83%88%20%ED%8F%B4%EB%8D%94/%EC%97%B0%EC%8A%B5%EB%AC%B4%EB%8C%80.mp4"
+      }
+    ];
+
+    const productListElement = document.getElementById("productList");
+    const summaryEmptyElement = document.getElementById("summaryEmpty");
+    const summaryListElement = document.getElementById("summaryList");
     const totalPriceElement = document.getElementById("totalPrice");
     const payButton = document.getElementById("payButton");
-    const customerNameInput = document.getElementById("customerName");
-    const customerEmailInput = document.getElementById("customerEmail");
 
     const orderArea = document.getElementById("orderArea");
     const loadingBox = document.getElementById("loadingBox");
@@ -481,19 +486,130 @@
       return new Intl.NumberFormat("ko-KR").format(amount) + "원";
     }
 
-    function getQuantity() {
-      return Number(quantitySelect.value);
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
-    function getTotalAmount() {
-      return PRODUCT.unitPrice * getQuantity();
+    function buildQuantityOptions() {
+      let options = `<option value="0">0개</option>`;
+
+      for (let i = 1; i <= MAX_QUANTITY; i += 1) {
+        options += `<option value="${i}">${i}개</option>`;
+      }
+
+      return options;
     }
 
-    function updatePrice() {
-      const amount = getTotalAmount();
+    function renderProductCards() {
+      productListElement.innerHTML = PRODUCTS.map((product) => {
+        const media =
+          product.mediaType === "video"
+            ? `<video src="${escapeHtml(product.mediaSrc)}" controls preload="metadata"></video>`
+            : `<img src="${escapeHtml(product.mediaSrc)}" alt="${escapeHtml(product.name)}" loading="lazy" />`;
 
-      totalPriceElement.textContent = formatWon(amount);
-      payButton.textContent = `${formatWon(amount)} 결제하기`;
+        return `
+          <section class="card" data-product-id="${product.id}">
+            <div class="product-media">
+              ${media}
+            </div>
+
+            <div class="content">
+              <span class="badge">판매 상품</span>
+
+              <h2 class="product-title">${escapeHtml(product.name)}</h2>
+
+              <p class="description">${escapeHtml(product.description)}</p>
+
+              <div class="row">
+                <div>
+                  <div class="row-label">가격</div>
+                  <div class="unit-price">1개 기준</div>
+                </div>
+
+                <strong>${formatWon(product.unitPrice)}</strong>
+              </div>
+
+              <div class="row">
+                <label for="quantity-${product.id}" class="row-label">수량</label>
+
+                <select id="quantity-${product.id}" class="quantity-select" data-product-id="${product.id}">
+                  ${buildQuantityOptions()}
+                </select>
+              </div>
+
+              <div class="row subtotal-row">
+                <span class="subtotal-label">소계</span>
+                <strong id="subtotal-${product.id}" class="subtotal-price">0원</strong>
+              </div>
+            </div>
+          </section>
+        `;
+      }).join("");
+    }
+
+    function getCartItems() {
+      return PRODUCTS.map((product) => {
+        const select = document.getElementById(`quantity-${product.id}`);
+        const quantity = Number(select?.value || 0);
+
+        return {
+          ...product,
+          quantity,
+          amount: product.unitPrice * quantity
+        };
+      }).filter((item) => item.quantity > 0);
+    }
+
+    function getTotalAmount(items) {
+      return items.reduce((sum, item) => sum + item.amount, 0);
+    }
+
+    function updateSummary() {
+      const items = getCartItems();
+      const totalAmount = getTotalAmount(items);
+
+      PRODUCTS.forEach((product) => {
+        const select = document.getElementById(`quantity-${product.id}`);
+        const quantity = Number(select?.value || 0);
+        const subtotalElement = document.getElementById(`subtotal-${product.id}`);
+
+        if (subtotalElement) {
+          subtotalElement.textContent = formatWon(product.unitPrice * quantity);
+        }
+      });
+
+      if (items.length === 0) {
+        summaryEmptyElement.style.display = "block";
+        summaryListElement.style.display = "none";
+        summaryListElement.innerHTML = "";
+
+        payButton.disabled = true;
+        payButton.textContent = "상품을 선택해주세요";
+      } else {
+        summaryEmptyElement.style.display = "none";
+        summaryListElement.style.display = "block";
+
+        summaryListElement.innerHTML = items
+          .map(
+            (item) => `
+              <li>
+                <span class="item-name">${escapeHtml(item.name)} × ${item.quantity}</span>
+                <span class="item-amount">${formatWon(item.amount)}</span>
+              </li>
+            `
+          )
+          .join("");
+
+        payButton.disabled = false;
+        payButton.textContent = `${formatWon(totalAmount)} 결제하기`;
+      }
+
+      totalPriceElement.textContent = formatWon(totalAmount);
     }
 
     function createRandomId(prefix) {
@@ -510,32 +626,16 @@
        * 토스 orderId는 영문, 숫자, -, _를 사용하고
        * 6자 이상 64자 이하로 생성합니다.
        */
-      return createRandomId("YAKISOBA");
+      return createRandomId("ORDER");
     }
 
     function createCustomerKey() {
       return createRandomId("customer");
     }
 
-    function validateOrderForm() {
-      const customerName = customerNameInput.value.trim();
-      const customerEmail = customerEmailInput.value.trim();
-
-      if (!customerName) {
-        alert("주문자 이름을 입력해주세요.");
-        customerNameInput.focus();
-        return false;
-      }
-
-      if (!customerEmail) {
-        alert("이메일을 입력해주세요.");
-        customerEmailInput.focus();
-        return false;
-      }
-
-      if (!customerEmailInput.checkValidity()) {
-        alert("올바른 이메일 주소를 입력해주세요.");
-        customerEmailInput.focus();
+    function validateOrderForm(items) {
+      if (items.length === 0) {
+        alert("주문할 상품을 하나 이상 선택해주세요.");
         return false;
       }
 
@@ -552,15 +652,27 @@
       return true;
     }
 
+    function buildOrderName(items) {
+      const firstItemName = `${items[0].name} ${items[0].quantity}개`;
+
+      if (items.length === 1) {
+        return firstItemName;
+      }
+
+      return `${firstItemName} 외 ${items.length - 1}건`;
+    }
+
     async function requestPayment() {
-      if (!validateOrderForm()) {
+      const items = getCartItems();
+
+      if (!validateOrderForm(items)) {
         return;
       }
 
-      const amount = getTotalAmount();
-      const quantity = getQuantity();
+      const amount = getTotalAmount(items);
       const orderId = createOrderId();
       const customerKey = createCustomerKey();
+      const orderName = buildOrderName(items);
 
       /*
        * 리다이렉트 후 승인 금액을 한 번 더 비교하기 위한 값입니다.
@@ -571,8 +683,13 @@
         JSON.stringify({
           orderId,
           amount,
-          quantity,
-          orderName: `${PRODUCT.name} ${quantity}개`
+          orderName,
+          items: items.map((item) => ({
+            id: item.id,
+            name: item.name,
+            quantity: item.quantity,
+            amount: item.amount
+          }))
         })
       );
 
@@ -595,13 +712,7 @@
           },
 
           orderId,
-          orderName:
-            quantity === 1
-              ? PRODUCT.name
-              : `${PRODUCT.name} ${quantity}개`,
-
-          customerName: customerNameInput.value.trim(),
-          customerEmail: customerEmailInput.value.trim(),
+          orderName,
 
           successUrl:
             window.location.origin +
@@ -617,7 +728,7 @@
         console.error(error);
 
         payButton.disabled = false;
-        updatePrice();
+        updateSummary();
 
         alert(
           error?.message ||
@@ -728,15 +839,23 @@
 
         sessionStorage.removeItem("pendingOrder");
 
+        const itemsDetail =
+          pendingOrder?.items
+            ?.map(
+              (item) =>
+                `${escapeHtml(item.name)} × ${item.quantity} (${formatWon(item.amount)})`
+            )
+            .join("<br />") || "";
+
         showResult({
           success: true,
           title: "결제가 완료되었습니다.",
-          message:
-            "야키소바 주문이 정상적으로 승인되었습니다.",
+          message: "주문이 정상적으로 승인되었습니다.",
           detail: `
             <strong>주문번호</strong>: ${escapeHtml(orderId)}<br />
             <strong>결제금액</strong>: ${formatWon(amount)}<br />
             <strong>결제상태</strong>: ${escapeHtml(result.status || "DONE")}
+            ${itemsDetail ? `<br /><br /><strong>주문 상품</strong><br />${itemsDetail}` : ""}
           `
         });
       } catch (error) {
@@ -816,20 +935,18 @@
         window.location.origin + window.location.pathname;
     }
 
-    function escapeHtml(value) {
-      return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
     function initializePage() {
-      quantitySelect.addEventListener("change", updatePrice);
+      renderProductCards();
+
+      document
+        .querySelectorAll(".quantity-select")
+        .forEach((select) => {
+          select.addEventListener("change", updateSummary);
+        });
+
       payButton.addEventListener("click", requestPayment);
 
-      updatePrice();
+      updateSummary();
 
       const params = new URLSearchParams(window.location.search);
       const paymentResult = params.get("payment");
